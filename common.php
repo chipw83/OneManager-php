@@ -1265,7 +1265,7 @@ function EnvOpt($needUpdate = 0)
     <tr>
         <td>Driver</td>
         <td>' . getConfig('Driver', $disktag);
-            if ($diskok && baseclassofdrive($disk_tmp)=='Onedrive') $html .= ' <a href="?AddDisk=' . get_class($disk_tmp) . '&disktag=' . $disktag . '&SelectDrive">' . getconstStr('ChangeOnedrivetype') . '</a>';
+            if ($diskok && baseclassofdrive($disk_tmp)!='Aliyundrive') $html .= ' <a href="?AddDisk=' . get_class($disk_tmp) . '&disktag=' . $disktag . '&SelectDrive">' . getconstStr('ChangeOnedrivetype') . '</a>';
             $html .= '</td>
     </tr>
     ';
