@@ -27,18 +27,14 @@ class Aliyundrive {
 
     public function ext_show_innerenv()
     {
-        return [];
+        return ['default_drive_id'];
     }
 
     public function list_files($path = '/')
     {
-        
-
 
         $files = $this->list_path($path);
 
-
-        
         return $this->files_format($files);
     }
 
