@@ -622,7 +622,7 @@ function curl($method, $url, $data = '', $headers = [], $returnheader = 0)
     //if (!isset($headers['Accept'])) $headers['Accept'] = '*/*';
     //if (!isset($headers['Referer'])) $headers['Referer'] = $url;
     //if (!isset($headers['Content-Type'])) $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    if (!isset($headers['Content-Type'])) $headers['Content-Type'] = '';
+    if (!(isset($headers['Content-Type'])||isset($headers['content-type']))) $headers['Content-Type'] = '';
     $sendHeaders = array();
     foreach ($headers as $headerName => $headerVal) {
         $sendHeaders[] = $headerName . ': ' . $headerVal;
