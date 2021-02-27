@@ -1401,6 +1401,13 @@ function EnvOpt($needUpdate = 0)
         if (config_f.config_t.value=="") {
             alert("input config");
             return false;
+        } else {
+            try {
+                var tmp = JSON.parse(config_f.config_t.value);
+            } catch(e) {
+                alert("config error!");
+                return false;
+            }
         }
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "");
