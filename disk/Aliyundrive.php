@@ -479,7 +479,7 @@ class Aliyundrive {
         $data['part_info_list'][0]['part_number'] = 1; // now only txt
         $data['size'] = filesize($tmpFilePath);
         $data['type'] = 'file';
-error_log1($url . ' ~ ' . json_encode($data));
+
         return curl('POST', $url, json_encode($data), $header);
     }
     protected function fileComplete($file_id, $upload_id, $etags) {
