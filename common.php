@@ -10,8 +10,8 @@ $EnvConfigs = [
     // 1 showed/enableEdit, 0 hidden/disableEdit
     // 1 base64 to save, 0 not base64
     'APIKey'            => 0b000, // used in heroku.
-    'SecretId'          => 0b000, // used in SCF.
-    'SecretKey'         => 0b000, // used in SCF.
+    'SecretId'          => 0b000, // used in SCF/CFC.
+    'SecretKey'         => 0b000, // used in SCF/CFC.
     'AccessKeyID'       => 0b000, // used in FC.
     'AccessKeySecret'   => 0b000, // used in FC.
     'HW_urn'            => 0b000, // used in FG.
@@ -1033,6 +1033,7 @@ function EnvOpt($needUpdate = 0)
     global $slash;
     global $drive;
     ksort($EnvConfigs);
+    $disktags = explode('|', getConfig('disktag'));
     $envs = '';
     //foreach ($EnvConfigs as $env => $v) if (isCommonEnv($env)) $envs .= '\'' . $env . '\', ';
     $envs = substr(json_encode(array_keys ($EnvConfigs)), 1, -1);
@@ -1097,6 +1098,52 @@ function EnvOpt($needUpdate = 0)
         }
         return message($html, $title);
     }
+    if (isset($_POST['config_b'])) {
+        //return output(json_encode($_POST));
+        if ($_POST['pass']!=''&&$_POST['pass']==getConfig('admin')) {
+            if ($_POST['config_b'] == 'export') {
+                foreach ($EnvConfigs as $env => $v) {
+                    if (isCommonEnv($env)) {
+                        $value = getConfig($env);
+                        if ($value) $tmp[$env] = $value;
+                    }
+                }
+                foreach ($disktags as $disktag) {
+                    $tmp[$disktag] = getConfig($disktag);
+                }
+                unset($tmp['admin']);
+                return output(json_encode($tmp, JSON_PRETTY_PRINT));
+            }
+            if ($_POST['config_b'] == 'import') {
+                if (!$_POST['config_t']) return output("{\"Error\": \"Empty config.\"}", 403);
+                $c = '{' . splitfirst($_POST['config_t'], '{')[1];
+                $c = splitlast($c, '}')[0] . '}';
+                $tmp = json_decode($c, true);
+                if (!!!$tmp) return output("{\"Error\": \"Config input error.\"}", 403);
+                $tmptag = $tmp['disktag'];
+                foreach ($EnvConfigs as $env => $v) {
+                    if (isCommonEnv($env)) {
+                        if (isShowedEnv($env)) {
+                            if (getConfig($env)!=''&&!isset($tmp[$env])) $tmp[$env] = '';
+                        } else {
+                            $tmp[$env] = '';
+                        }
+                    }
+                }
+                $tmp['disktag'] = $tmptag;
+                $response = setConfigResponse( setConfig($tmp, $_SERVER['disk_oprating']) );
+                if (api_error($response)) {
+                    return output("{\"Error\": \"" . api_error_msg($response) . "\"}", 500);
+                } else {
+                    return output("{\"Success\": \"Success\"}", 200);
+                }
+            }
+            return output(json_encode($_POST), 500);
+        } else {
+            return output("{\"Error\": \"Error admin pass\"}", 403);
+        }
+    }
+
     if (isset($_GET['preview'])) {
         $preurl = $_SERVER['PHP_SELF'] . '?preview';
     } else {
@@ -1161,7 +1208,7 @@ function EnvOpt($needUpdate = 0)
         <tr><td><input type="submit" name="submit1" value="' . getconstStr('Setup') . '"></td></tr>
     </form>
 </table><br>';
-    $disktags = explode('|', getConfig('disktag'));
+
     if (count($disktags)>1) {
         $html .= '
 <script src="//cdn.bootcss.com/Sortable/1.8.3/Sortable.js"></script>
@@ -1297,6 +1344,86 @@ function EnvOpt($needUpdate = 0)
 </table><br>';
         }
     }
+    $html .= '
+<table>
+    <form id="config_f" name="config" action="" method="POST" onsubmit="return false;">
+    <tr>
+        <td>admin pass:<input type="password" name="pass"></td>
+        <td><button name="config_b" value="export" onclick="exportConfig(this);">export</button></td>
+    </tr>
+    <tr>
+        <td>config:<textarea name="config_t"></textarea></td>
+        <td><button name="config_b" value="import" onclick="importConfig(this);">import</button></td>
+    </tr>
+    </form>
+</table>
+<script>
+    var config_f = document.getElementById("config_f");
+    function exportConfig(b) {
+        if (config_f.pass.value=="") {
+            alert("admin pass");
+            return false;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "");
+        //xhr.setRequestHeader("User-Agent","qkqpttgf/OneManager");
+        xhr.onload = function(e){
+            console.log(xhr.responseText+","+xhr.status);
+            if (xhr.status==200) {
+                var res = JSON.parse(xhr.responseText);
+                //if ("Success" in res) {
+                //    alert("Import success");
+                //} else {
+                    config_f.config_t.value = xhr.responseText;
+                    config_f.parentNode.style = "width: 100%";
+                    config_f.config_t.style = "width: 100%";
+                    config_f.config_t.style.height = config_f.config_t.scrollHeight + "px";
+                //}
+            } else {
+                alert(xhr.status+"\n"+xhr.responseText);
+            }
+        }
+        xhr.onerror = function(e){
+            alert("Network Error "+xhr.status);
+        }
+        xhr.send("pass=" + config_f.pass.value + "&config_b=" + b.value);
+
+        //return false;
+    }
+    function importConfig(b) {
+        if (config_f.pass.value=="") {
+            alert("admin pass");
+            return false;
+        }
+        if (config_f.config_t.value=="") {
+            alert("input config");
+            return false;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "");
+        //xhr.setRequestHeader("User-Agent","qkqpttgf/OneManager");
+        xhr.onload = function(e){
+            console.log(xhr.responseText+","+xhr.status);
+            if (xhr.status==200) {
+                var res = JSON.parse(xhr.responseText);
+                //if ("Success" in res) {
+                    alert("Import success");
+                //} else {
+                //    config_f.config_t.style = "width: 100%";
+                //    config_f.config_t.value = xhr.responseText;
+                //}
+            } else {
+                alert(xhr.status+"\n"+xhr.responseText);
+            }
+        }
+        xhr.onerror = function(e){
+            alert("Network Error "+xhr.status);
+        }
+        xhr.send("pass=" + config_f.pass.value + "&config_t=" + config_f.config_t.value + "&config_b=" + b.value);
+
+        //return false;
+    }
+</script><br>';
     $Diver_arr = scandir(__DIR__ . $slash . 'disk');
     $html .= '
 <select name="DriveType" onchange="changedrivetype(this.options[this.options.selectedIndex].value)">';
