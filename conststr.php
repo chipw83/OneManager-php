@@ -325,11 +325,11 @@ $constStr = [
     ],
     'SetpassfileBfEncrypt' => [
         'en-us' => 'Set \'passfile\' in Environments before encrypt',
-        'zh-cn' => '先在环境变量设置passfile才能加密',
-        'zh-tw' => '先在環境變數設定passfile才能加密',
-        'ja' => '最初に暗号化する環境変数にパスファイルを設定します',
+        'zh-cn' => '先设置passfile才能加密',
+        'zh-tw' => '先設定passfile才能加密',
+        'ja' => '最初に暗号化する変数にパスファイルを設定します',
         'ko-kr' => '암호화하기 전에 환경 변수에 패스 파일을 설정하십시오',
-        'fa' => 'قبل از رمزگذاری \"pass file \" را در محیط تنظیم کنید',
+        'fa' => 'قبل از رمزگذاری \"passfile \" را در محیط تنظیم کنید',
         'ar-sa' => 'أولا تعيين متغير البيئة passfile لتشفير',
     ],
     'updateProgram' => [
