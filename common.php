@@ -449,7 +449,9 @@ function proxy_replace_domain($url, $domainforproxy)
     if (substr($domainforproxy, 0, 7)=='http://' || substr($domainforproxy, 0, 8)=='https://') $aim = $domainforproxy;
     else $aim = $http . '//' . $domainforproxy;
     if (substr($aim, -1)=='/') $aim = substr($aim, 0, -1);
-    return $aim . '/' . $uri . '&Origindomain=' . $domain;
+    if (strpos($url, '?')>0) $sp = '&';
+    else $sp = '?';
+    return $aim . '/' . $uri . $sp . 'Origindomain=' . $domain;
     //$url = str_replace($tmp, $domainforproxy, $url).'&Origindomain='.$tmp;
 }
 
