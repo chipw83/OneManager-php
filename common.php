@@ -1130,6 +1130,9 @@ function EnvOpt($needUpdate = 0)
                         }
                     }
                 }
+                foreach ($disktags as $disktag) {
+                    if (!isset($tmp[$disktag])) $tmp[$disktag] = '';
+                }
                 $tmp['disktag'] = $tmptag;
                 $response = setConfigResponse( setConfig($tmp, $_SERVER['disk_oprating']) );
                 if (api_error($response)) {
