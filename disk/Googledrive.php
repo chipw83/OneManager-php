@@ -449,6 +449,12 @@ class Googledrive {
     }
 
     protected function get_access_token($refresh_token) {
+        if (!$refresh_token) {
+            $tmp['stat'] = 0;
+            $tmp['body'] = 'No refresh_token';
+            $this->error = $tmp;
+            return false;
+        }
         if (!($this->access_token = getcache('access_token', $this->disktag))) {
             $p=0;
             $data['client_id'] = $this->client_id;
