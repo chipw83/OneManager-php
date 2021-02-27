@@ -15,7 +15,7 @@ class Googledrive {
             $this->client_secret = 'LlCV-rQClzYIKCEqiVddh68G';
             //$this->api_key = 'AIzaSyBjQG09ET3pqEXKs25K8OPI_YYBWuR0EZQ';
         }
-        //$this->oauth_url = 'https://www.googleapis.com/oauth2/v4/token';
+        //$this->oauth_url = 'https://www.googleapis.com/oauth2/v4/';
         $this->oauth_url = 'https://accounts.google.com/o/oauth2/';
         $this->api_url = 'https://www.googleapis.com/drive/v3/';
         $this->scope = 'https://www.googleapis.com/auth/drive';
@@ -293,8 +293,10 @@ class Googledrive {
             $data['grant_type'] = 'authorization_code';
             $data['redirect_uri'] = $this->redirect_uri;
             $data['code'] = $_GET['code'];
+            $api = $this->oauth_url . 'token';
+            //$api = 'https://www.googleapis.com/oauth2/v4/token';
             $tmp = curl('POST',
-                $this->oauth_url . 'token',
+                $api,
                 json_encode($data)
             );
             if ($tmp['stat']==200) $ret = json_decode($tmp['body'], true);
