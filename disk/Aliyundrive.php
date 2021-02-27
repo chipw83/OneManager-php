@@ -479,7 +479,7 @@ class Aliyundrive {
         $data['part_info_list'][0]['part_number'] = 1; // now only txt
         $data['size'] = filesize($tmpFilePath);
         $data['type'] = 'file';
-
+error_log1($url . ' ~ ' . json_encode($data));
         return curl('POST', $url, json_encode($data), $header);
     }
     protected function fileComplete($file_id, $upload_id, $etags) {
@@ -698,6 +698,12 @@ class Aliyundrive {
         return message($html, $title, 201);
     }
     protected function get_access_token($refresh_token) {
+        if (!$refresh_token) {
+            $tmp['stat'] = 0;
+            $tmp['body'] = 'No refresh_token';
+            $this->error = $tmp;
+            return false;
+        }
         if (!($this->access_token = getcache('access_token', $this->disktag))) {
             $p=0;
             $tmp1['refresh_token'] = $refresh_token;
@@ -705,7 +711,7 @@ class Aliyundrive {
                 $response = curl('POST', $this->auth_url, json_encode($tmp1), ["content-type"=>"application/json; charset=utf-8"]);
                 $p++;
             }
-            error_log1(json_encode($response));
+            //error_log1(json_encode($response));
             if ($response['stat']==200) $ret = json_decode($response['body'], true);
             if (!isset($ret['access_token'])) {
                 error_log1('failed to get [' . $this->disktag . '] access_token. response: ' . $response['stat'] . $response['body']);
@@ -715,8 +721,8 @@ class Aliyundrive {
                 return false;
             }
             $tmp = $ret;
-            $tmp['access_token'] = '******';
-            $tmp['refresh_token'] = '******';
+            $tmp['access_token'] = substr($tmp['access_token'], 0, 10) . '******';
+            $tmp['refresh_token'] = substr($tmp['refresh_token'], 0, 10) . '******';
             error_log1('[' . $this->disktag . '] Get access token:' . json_encode($tmp, JSON_PRETTY_PRINT));
             $this->access_token = $ret['access_token'];
             savecache('access_token', $this->access_token, $this->disktag, $ret['expires_in'] - 300);
