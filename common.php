@@ -1269,12 +1269,11 @@ function EnvOpt($needUpdate = 0)
             $html .= '</td>
     </tr>
     ';
-            foreach (extendShow_diskenv($disk_tmp) as $ext_env) {
-                $html .= '<tr><td>' . $ext_env . '</td><td>' . getConfig($ext_env, $disktag) . '</td></tr>
-    ';
-            }
-
             if ($diskok) {
+                foreach (extendShow_diskenv($disk_tmp) as $ext_env) {
+                    $html .= '<tr><td>' . $ext_env . '</td><td>' . getConfig($ext_env, $disktag) . '</td></tr>
+    ';
+                }
                 $html .= '
     <form name="' . $disktag . '" action="" method="post">
         <input type="hidden" name="disk" value="' . $disktag . '">';
@@ -1291,7 +1290,7 @@ function EnvOpt($needUpdate = 0)
             } else {
                 $html .= '
     <tr>
-        <td colspan="2">' . $disk_tmp->error['body'] . '</td>
+        <td colspan="2">' . ($disk_tmp->error['body']?$disk_tmp->error['body']:'Add this disk again.') . '</td>
     </tr>';
             }
             $html .= '
