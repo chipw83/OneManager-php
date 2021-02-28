@@ -125,6 +125,7 @@ class Aliyundrive {
                         $files['content'] = $content1;
                         savecache('path_' . $path, $files, $this->disktag);
                     }
+                    error_log1($files['name'] . ' : ' . json_encode($files['content']) . PHP_EOL);
                 }
             }
             if (!$files) {
@@ -250,8 +251,6 @@ class Aliyundrive {
             $upload_id = $res['upload_id'];
             $result = curl('PUT', $url, $pass, [], 1);
             if ($result['stat']==200) { // 块1传好
-                //$tmp1['part_number'] = 1;
-                //$tmp1['etag'] = $result['returnhead']['ETag'];
                 $result = $this->fileComplete($file_id, $upload_id, [ $result['returnhead']['ETag'] ]);
                 return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
             }
@@ -328,7 +327,7 @@ class Aliyundrive {
             $result = curl('PUT', $url, $content, [], 1);
             if ($result['stat']==200) { // 块1传好
                 $etag = $result['returnhead']['ETag'];
-                $result = $this->fileComplete($file_id, $upload_id, $etag);
+                $result = $this->fileComplete($file_id, $upload_id, [ $etag ]);
                 if ($result['stat']!=200) return output($result['body'], $result['stat']);
                 else return output('success', 0);
             }*/
@@ -360,9 +359,7 @@ class Aliyundrive {
             $upload_id = $res['upload_id'];
             $result = curl('PUT', $url, $content, [], 1);
             if ($result['stat']==200) { // 块1传好
-                $tmp2['part_number'] = 1;
-                $tmp2['etag'] = $result['returnhead']['ETag'];
-                $result = $this->fileComplete($file_id, $upload_id, [ $tmp2 ]);
+                $result = $this->fileComplete($file_id, $upload_id, [ $result['returnhead']['ETag'] ]);
                 if ($result['stat']!=200) return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
                 else return output('success', 0);
             }
@@ -406,9 +403,7 @@ class Aliyundrive {
                 $result = curl('PUT', $url, $content, [], 1);
                 //error_log1('2,url:' . $url .' res:' . json_encode($result));
                 if ($result['stat']==200) { // 块1传好
-                    $tmp1['part_number'] = 1;
-                    $tmp1['etag'] = $result['returnhead']['ETag'];
-                    $result = $this->fileComplete($file_id, $upload_id, [ $tmp1 ]);
+                    $result = $this->fileComplete($file_id, $upload_id, [ $result['returnhead']['ETag'] ]);
                     //error_log1('3,url:' . $url .' res:' . json_encode($result));
                     return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
                 }
