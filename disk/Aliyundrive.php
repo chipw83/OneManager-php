@@ -250,9 +250,9 @@ class Aliyundrive {
             $upload_id = $res['upload_id'];
             $result = curl('PUT', $url, $pass, [], 1);
             if ($result['stat']==200) { // 块1传好
-                $tmp1['part_number'] = 1;
-                $tmp1['etag'] = $result['returnhead']['ETag'];
-                $result = $this->fileComplete($file_id, $upload_id, [ $tmp1 ]);
+                //$tmp1['part_number'] = 1;
+                //$tmp1['etag'] = $result['returnhead']['ETag'];
+                $result = $this->fileComplete($file_id, $upload_id, [ $result['returnhead']['ETag'] ]);
                 return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
             }
         }
