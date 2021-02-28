@@ -50,8 +50,7 @@ class Googledrive {
     public function list_files($path = '/')
     {
         $files = $this->list_path($path);
-        if (isset($files['id'])&&$files['shared']===false) $this->permission('create', $files['id']);
-        //$this->permission('delete', $files['id']);
+
         return $this->files_format($files);
     }
 
@@ -103,7 +102,7 @@ class Googledrive {
         while (substr($path, -1)=='/') $path = substr($path, 0, -1);
         if ($path == '') $path = '/';
 
-        if (!($files = getcache('path_' . $path, $this->disktag))) {
+        //if (!($files = getcache('path_' . $path, $this->disktag))) {
             //$response = curl('GET', $this->api_url . 'drives', '', ['Authorization' => 'Bearer ' . $this->access_token]);
             //$response = curl('GET', $this->api_url . 'files?fields=*,files(id,name,mimeType,size,modifiedTime,parents,webContentLink,thumbnailLink),nextPageToken' . (($this->default_drive_id!='')?'&driveId=' . $this->default_drive_id . '&corpora=teamDrive&includeItemsFromAllDrives=true&supportsAllDrives=true':''), '', ['Authorization' => 'Bearer ' . $this->access_token]);
             if ($path == '/' || $path == '') {
@@ -116,6 +115,7 @@ class Googledrive {
                 $parent_path = $tmp[0];
                 $filename = urldecode($tmp[1]);
                 $parent_folder = $this->list_path($parent_path);
+                $i = 0;
                 foreach ($parent_folder['files'] as $item) {
                     if ($item['name']==$filename) {
                         if ($item['mimeType']=='application/vnd.google-apps.folder') {
@@ -125,22 +125,32 @@ class Googledrive {
                             $files['name'] = $item['name'];
                             $files['time'] = $item['modifiedTime'];
                             $files['size'] = $item['size'];
-                        } else $files = $item;
-                        
+                        } else {
+                            //if (isset($item['mimeType']) && $item['mimeType']!='application/vnd.google-apps.folder') {
+                                if (in_array(splitlast($item['name'],'.')[1], $exts['txt'])) {
+                                    if (!(isset($item['content'])&&$item['content']['stat']==200)) {
+                                        $content1 = curl('GET', $item['webContentLink'], '', '', 1);
+                                        //error_log1(json_encode($tmp, JSON_PRETTY_PRINT));
+                                        if ($content1['stat']==302) {
+                                            $content1 = curl('GET', $content1['returnhead']['Location'], '', ["User-Agent"=>"qkqpttgf/OneManager 3.0.0", "Accept"=>"*/*"], 1);
+                                        }
+                                        error_log1($item['name'] . '~' . json_encode($content1, JSON_PRETTY_PRINT) . PHP_EOL);
+                                        $item['content'] = $content1;
+                                        $parent_folder['files'][$i] = $item;
+                                        savecache('path_' . $path, $parent_folder, $this->disktag);
+                                    }
+                                }
+                                if (isset($files['id'])&&$files['shared']===false) $this->permission('create', $files['id']);
+                                //$this->permission('delete', $files['id']);
+                            //}
+                            $files = $item;
+                        } 
                     }
-                    
+                    $i++;
                 }
                 //echo $files['name'];
             }
-            /*if ($files['type']=='file') {
-                if (in_array(splitlast($files['name'],'.')[1], $exts['txt'])) {
-                    if (!(isset($files['content'])&&$files['content']['stat']==200)) {
-                        $content1 = curl('GET', $files['download_url']);
-                        $files['content'] = $content1;
-                        savecache('path_' . $path, $files, $this->disktag);
-                    }
-                }
-            }
+
             if (!$files) {
                 $files['error']['code'] = 'Not Found';
                 $files['error']['message'] = 'Not Found';
@@ -151,8 +161,8 @@ class Googledrive {
                 $files['error']['message'] = $files['body'];
             } else {
                 savecache('path_' . $path, $files, $this->disktag, 600);
-            }*/
-        }
+            }
+        //}
         //error_log1('path:' . $path . ', files:' . json_encode($files, JSON_PRETTY_PRINT));
         //error_log1('path:' . $path . ', files:' . substr(json_encode($files), 0, 150));
         return $files;
