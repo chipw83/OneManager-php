@@ -314,7 +314,7 @@ class Googledrive {
             }
         </script>';
                 $tmptoken['refresh_token'] = $refresh_token;
-                $tmptoken['token_expires'] = time()+7*24*60*60;
+                //$tmptoken['token_expires'] = time()+7*24*60*60;
                 $response = setConfigResponse( setConfig($tmptoken, $this->disktag) );
                 if (api_error($response)) {
                     $html = api_error_msg($response);
@@ -479,11 +479,11 @@ class Googledrive {
             }
             $tmp = $ret;
             $tmp['access_token'] = substr($tmp['access_token'], 0, 10) . '******';
-            $tmp['refresh_token'] = substr($tmp['refresh_token'], 0, 10) . '******';
+            //$tmp['refresh_token'] = substr($tmp['refresh_token'], 0, 10) . '******';
             error_log1('[' . $this->disktag . '] Get access token:' . json_encode($tmp, JSON_PRETTY_PRINT));
             $this->access_token = $ret['access_token'];
             savecache('access_token', $this->access_token, $this->disktag, $ret['expires_in'] - 300);
-            if (time()>getConfig('token_expires', $this->disktag)) setConfig([ 'refresh_token' => $ret['refresh_token'], 'token_expires' => time()+7*24*60*60 ], $this->disktag);
+            //if (time()>getConfig('token_expires', $this->disktag)) setConfig([ 'refresh_token' => $ret['refresh_token'], 'token_expires' => time()+7*24*60*60 ], $this->disktag);
             return true;
         }
         return true;
