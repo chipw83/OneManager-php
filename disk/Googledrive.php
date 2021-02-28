@@ -140,7 +140,7 @@ class Googledrive {
                                         savecache('path_' . $path, $parent_folder, $this->disktag);
                                     }
                                 }
-                                if (isset($files['id'])&&$files['shared']===false) $this->permission('create', $files['id']);
+                                if (isset($item['id'])&&$item['shared']===false) $this->permission('create', $item['id']);
                                 //$this->permission('delete', $files['id']);
                             //}
                             $files = $item;
